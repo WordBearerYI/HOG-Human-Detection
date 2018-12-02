@@ -1,79 +1,80 @@
 #include "hog.h"
-using namespace std;
 // bins = 9 for each cell
 // form cellbins for the picture
-bool cellDivide(int* dirArray, int* gradArray, double *cellBins, int cellSize)
+
+vector<double> cellDivide(int* dirArray, int* gradArray)// double *cellBins, int cellSize)
 {
-    cellBins = new double[9*(H/cellSize)*(W/cellSize)];
-    for (int i = 0; i<H/cellSize; i++)
+    vector<vector<double>> cellBins((H/CELLLENGTH)*(W/CELLLENGTH),vector<double>(9,0));
+    //cellBins = new double[9*(H/cellSize)*(W/cellSize)];
+    for (int i = 0; i<H/CELLLENGTH; i++)
     {
-        for (int j=0; j<W/cellSize; j++)
+        for (int j=0; j<W/CELLLENGTH; j++)
         {
             //cellBins[i*W/cellSize+j] = new double[9];
-            double tmpBins[9]={0};
-            for (int k=0; k<cellSize; k++)
+            vector<double> tmpBins(9,0);
+            for (int k=0; k<CELLLENGTH; k++)
             {
-                for (int p=0; p<cellSize; p++)
+                for (int p=0; p<CELLLENGTH; p++)
                 {
-                    cout<<dirArray[(i*cellSize+k)*W+j*cellSize+p]<<' '<<gradArray[(i*cellSize+k)*W+j*cellSize+p]<<endl;
-                    binForm(dirArray[(i*cellSize+k)*W+j*cellSize+p],gradArray[(i*cellSize+k)*W+j*cellSize+p],tmpBins);
+                    //cout<<dirArray[(i*CELLLENGTH+k)*W+j*CELLLENGTH+p]<<' '<<gradArray[(i*CELLLENGTH+k)*W+j*CELLLENGTH+p]<<endl;
+                binForm(dirArray[(i*CELLLENGTH+k)*W+j*CELLLENGTH+p],gradArray[(i*CELLLENGTH+k)*W+j*CELLLENGTH+p],tmpBins);
                 }
             }
             //cout<<i<<' '<<j<<' '<< (i*W/cellSize+j)<<endl;
-            for (int q = 0; q<9; q++)
-            {
-                cellBins[9*(i*(W/cellSize)+j)+q] =tmpBins[q];
-                cout<<tmpBins[q]<<' ';
-                //cellBins[i*W/cellSize+j][q] = tmpBins[q];
-                //cout<<tmpBins[q]<<endl;
-            }
-            cout<<endl;
+            cellBins[i*(W/CELLLENGTH)+j] = tmpBins;
         }
     }
-    return 1;
-}
-
-// form block bins, stride unit: cell
-// cellBins: (H/cellSize*W/cellSize) * 9
-// blockbins: (H/cellSize-1)*(W/cellSize-1)*9*4
-bool featureForm(double* cellBins, double* blockbins, int cellLength)
-{
-    for (int i = 0; i<H/cellLength-1; i++)
+    // form block bins, stride unit: cell
+    // cellBins: (H/cellSize*W/cellSize) * 9
+    // blockbins: (H/cellSize-1)*(W/cellSize-1)*9*4
+    
+    vector<vector<double>> descriptor((H/CELLLENGTH-1)*(W/CELLLENGTH-1),vector<double>(9*4,0));
+    vector<double> descriptor_flat((H/CELLLENGTH-1)*(W/CELLLENGTH-1)*36,0);
+    
+    cout<<descriptor.size()<<' '<<descriptor[0].size()<<endl;
+    cout<<cellBins.size()<<' '<<cellBins[0].size()<<endl;
+    for (int i = 0; i<H/CELLLENGTH-1; i++)
     {
-        for (int j=0; j<W/cellLength-1; j++)
+        for (int j=0; j<W/CELLLENGTH-1; j++)
         {
-            int curNum = i*(W/cellLength-1)+j;
-            double tmpBlockBins[36]={0};
             double sum = 0;
             for (int p=0; p<2; p++)
             {
                 for (int q=0; q<2; q++)
                 {
-                    int curBinPos = (p+i)*(W/cellLength-1)+q+j;
+                    //nt curBinPos = (p+i)*(W/CELLLENGTH-1)+q+j;
                     for (int n=0; n<9; n++)
                     {
-                        sum += cellBins[curBinPos*9+n]*cellBins[curBinPos*9+n];
-                        tmpBlockBins[(p*2+q)*9+n] = cellBins[curBinPos*9+n];
+                        sum += cellBins[(i+p)*(W/CELLLENGTH-1)+j+q][n]*cellBins[(i+p)*(W/CELLLENGTH-1)+j+q][n];
+                        descriptor[i*(W/CELLLENGTH-1)+j][(p*2+q)*9+n]= cellBins[(i+p)*(W/CELLLENGTH-1)+j+q][n];
                     }
                 }
             }
             sum = sqrt(sum);
-            for (int l=0;l<36;l++)
+            for (int l=0; l<36; l++)
             {
-                blockbins[36*curNum+l] = tmpBlockBins[l]/sum;
+                descriptor[i*(W/CELLLENGTH-1)+j][l] = descriptor[i*(W/CELLLENGTH-1)+j][l]/sum;
             }
         }
     }
-    return 1;
+    
+    for (int i = 0; i<descriptor.size(); i++)
+    {
+        for (int j=0; j<descriptor[0].size(); j++)
+        {
+            descriptor_flat[i*descriptor[0].size()+j] = descriptor[i][j];
+        }
+    }
+    return descriptor_flat;
 }
-
 
 
 //calculate bins for angles from -10~170
 //bin 10 30 50 70 90 110 130 150 170
 //ind 0  1  2  3  4  5   6   7   8
-void binForm(double angle, int grad, double bins[9])
+void binForm(double angle, int grad, vector<double>&bins)
 {
+    //vector<double> bins = tmpbins;
     if (angle >= 170)
     {
         angle -= 180;
@@ -132,5 +133,5 @@ void binForm(double angle, int grad, double bins[9])
         bins[7] += grad*(160-angle)/20.0;
         bins[8] += grad*(angle-140)/20.0;
     }
-    
+    return;
 }

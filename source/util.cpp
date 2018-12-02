@@ -2,7 +2,8 @@
 
 using namespace std;
 int *img;
-int H,W;
+int H = 96;
+int W = 160;
 
 int isRead = 0;
 int num_Chn = 3;
@@ -43,7 +44,7 @@ bool readImg(string imageName) {
                 header2[i] = image.get();
             }
         }
-        cout << " W:"<<W << " H:" << H << " header_size:"<<head_size<<" channel:"<<num_Chn <<" pixel_size:"<< num_Chn*8 <<" dummy_size:"<<dummy_size<<endl;
+        //cout << " W:"<<W << " H:" << H << " header_size:"<<head_size<<" channel:"<<num_Chn <<" pixel_size:"<< num_Chn*8 <<" dummy_size:"<<dummy_size<<endl;
         
         //read image pixels after header. Images with width cannot divided by 4 will have 0 padding. So I introduce variable dummy sizes to skip through those padding bytes
 		for (int i = 0; i < H; i++)
@@ -63,7 +64,7 @@ bool readImg(string imageName) {
                             rgb[p] = int(image.get());
                         }
                         //if it is a RGB image, make RGB greyscale
-                        img[i*(dummy_size+W)+j] = 0.3*rgb[0] + 0.6*rgb[1] + 0.11*rgb[2];
+                        img[i*(dummy_size+W)+j] = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2];
                     }
                     else
                     {
@@ -74,7 +75,7 @@ bool readImg(string imageName) {
             }
                 
 		}
-        cout<<"dummy sample: "<<dummy<<endl;
+        //cout<<"dummy sample: "<<dummy<<endl;
 		image.close();
 		isRead = 1;
 		return 1;
