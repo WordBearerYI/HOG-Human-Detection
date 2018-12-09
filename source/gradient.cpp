@@ -86,10 +86,13 @@ bool gradientForm(int *array,int opType,int *magArray, int *dirArray)
         yarray = new int[H*W];
         //Gx
 		convol(array, sizeImg, OP_PEWITT_X, sizeOp, 1, xarray);
-		fill(xarray, xarray,1,4);
+		fill_no_norm(xarray, xarray,4);
+        
         //Gy
 		convol(array, sizeImg, OP_PEWITT_Y, sizeOp, 1, yarray);
-		fill(yarray, yarray,1,4);
+		fill_no_norm(yarray, yarray,4);
+        
+        
         
         // make sure no pixel has a value larger than 255 (maximum of our greyscale)
 		for (int i = 0; i < rowArray; i++)
@@ -104,8 +107,21 @@ bool gradientForm(int *array,int opType,int *magArray, int *dirArray)
                     dirArray[i*colArray+j] = 0;
                 else
                     dirArray[i*colArray+j] = (atan2(yarray[i*colArray+j], xarray[i*colArray+j]) / PI * 180);
-			}
+               
+                
+            
+            }
 		}
+        /*
+        for (int i = 0; i < rowArray; i++)
+        {
+            for (int j = 0; j < colArray; j++)
+            {
+                cout<<dirArray[i*colArray+j]<<' ';
+            }
+            cout<<endl;
+        }
+         */
         fill(magArray, magArray,1,4);
     }
 	return 1;
@@ -129,6 +145,23 @@ int myMax(int a, int b, int c)
 		else
 			return c;
 	}
+}
+
+bool fill_no_norm(int* array1, int* array2,int reduce)
+{
+    for (int i = 0; i < H; i++)
+    {
+        for (int j = 0; j < W; j++)
+        {
+            if (i>=H-reduce || j>=W-reduce||i<reduce||j<reduce)
+            {
+                array2[i * W + j] = 0;
+            }
+            
+        }
+    }
+    
+    return 1;
 }
 
 //auxillary function for truncate surrounding matrix and perform global division.
@@ -163,6 +196,7 @@ bool fill(int* array1, int* array2, int div, int reduce)
             
         }
     }
-	
 	return 1;
 }
+
+

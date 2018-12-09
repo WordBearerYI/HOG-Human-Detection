@@ -16,5 +16,5 @@ bool gradientForm(int* array, int, int* grad, int* dir);
 int angle_class(double);
 int myMax(int, int, int);
 bool fill(int* array1, int* array2, int div, int reduce);
-
+bool fill_no_norm(int* array1, int* array2,int reduce);
 #endif
