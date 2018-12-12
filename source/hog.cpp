@@ -2,25 +2,23 @@
 // bins = 9 for each cell
 // form cellbins for the picture
 
+//form histogram for each cell
 vector<double> cellDivide(int* dirArray, int* gradArray)// double *cellBins, int cellSize)
 {
-    vector<vector<double>> cellBins((H/CELLLENGTH)*(W/CELLLENGTH),vector<double>(9,0));
-    //cellBins = new double[9*(H/cellSize)*(W/cellSize)];
+    vector<vector<double> > cellBins((H/CELLLENGTH)*(W/CELLLENGTH),vector<double>(9,0));
     for (int i = 0; i<H/CELLLENGTH; i++)
     {
         for (int j=0; j<W/CELLLENGTH; j++)
         {
-            //cellBins[i*W/cellSize+j] = new double[9];
             vector<double> tmpBins(9,0);
             for (int k=0; k<CELLLENGTH; k++)
             {
                 for (int p=0; p<CELLLENGTH; p++)
                 {
                     //cout<<dirArray[(i*CELLLENGTH+k)*W+j*CELLLENGTH+p]<<' '<<gradArray[(i*CELLLENGTH+k)*W+j*CELLLENGTH+p]<<endl;
-                binForm(dirArray[(i*CELLLENGTH+k)*W+j*CELLLENGTH+p],gradArray[(i*CELLLENGTH+k)*W+j*CELLLENGTH+p],tmpBins);
+                    binForm(dirArray[(i*CELLLENGTH+k)*W+j*CELLLENGTH+p],gradArray[(i*CELLLENGTH+k)*W+j*CELLLENGTH+p],tmpBins);
                 }
             }
-            //cout<<i<<' '<<j<<' '<< (i*W/cellSize+j)<<endl;
             cellBins[i*(W/CELLLENGTH)+j] = tmpBins;
         }
     }
@@ -28,7 +26,9 @@ vector<double> cellDivide(int* dirArray, int* gradArray)// double *cellBins, int
     // cellBins: (H/cellSize*W/cellSize) * 9
     // blockbins: (H/cellSize-1)*(W/cellSize-1)*9*4
     
-    vector<vector<double>> descriptor((H/CELLLENGTH-1)*(W/CELLLENGTH-1),vector<double>(9*4,0));
+    //store 2d descriptors N*1, {(H/cellSize-1)*(W/cellSize-1)}*{36}
+    vector<vector<double> > descriptor((H/CELLLENGTH-1)*(W/CELLLENGTH-1),vector<double>(9*4,0));
+    //store flat descriptors {(H/cellSize-1)*(W/cellSize-1)*9*4}*1
     vector<double> descriptor_flat((H/CELLLENGTH-1)*(W/CELLLENGTH-1)*36,0);
     
     cout<<descriptor.size()<<' '<<descriptor[0].size()<<endl;
@@ -42,7 +42,7 @@ vector<double> cellDivide(int* dirArray, int* gradArray)// double *cellBins, int
             {
                 for (int q=0; q<2; q++)
                 {
-                    //nt curBinPos = (p+i)*(W/CELLLENGTH-1)+q+j;
+                    //forming block from cells;
                     for (int n=0; n<9; n++)
                     {
                         sum += cellBins[(i+p)*(W/CELLLENGTH-1)+j+q][n]*cellBins[(i+p)*(W/CELLLENGTH-1)+j+q][n];
@@ -62,7 +62,6 @@ vector<double> cellDivide(int* dirArray, int* gradArray)// double *cellBins, int
     {
         for (int j=0; j<descriptor[0].size(); j++)
         {
-            //cout<<descriptor[i][j]<<' ';
             descriptor_flat[i*descriptor[0].size()+j] = descriptor[i][j];
         }
     }
@@ -73,18 +72,15 @@ vector<double> cellDivide(int* dirArray, int* gradArray)// double *cellBins, int
 //calculate bins for angles from -10~170
 //bin 10 30 50 70 90 110 130 150 170
 //ind 0  1  2  3  4  5   6   7   8
+//divide between neighbors with proportion
 void binForm(double angle, int grad, vector<double>&bins)
 {
-    //cout<<"angle "<<angle;
-    //vector<double> bins = tmpbins;
     if (angle >= 170)
     {
-        //cout<<"outbound "<<angle;
         angle -= 180;
     }
     if (angle < -10)
     {
-        //cout<<"loewbound "<<angle;
         angle += 180;
     }
     if (angle <= 0)

@@ -17,7 +17,7 @@ neuNet::neuNet(vector<int> neurons_size)
                 ly.act_type = 0;
                 ly.neu_next = neurons_size[i+1];
                 ly.neu_this = neurons_size[i];
-                vector<vector<double>> tmp (neurons_size[i],vector<double>(neurons_size[i+1],0));
+                vector<vector<double> > tmp (neurons_size[i],vector<double>(neurons_size[i+1],0));
                 for (int j=0; j<ly.neu_this; j++)
                 {
                     for (int p=0; p<ly.neu_next; p++)
@@ -35,7 +35,7 @@ neuNet::neuNet(vector<int> neurons_size)
             {
                 ly.act_type = 1;
                 ly.neu_this = neurons_size[i];
-                ly.weights = {{1}};
+                //ly.weights = { {1} };
             }
             ly.bs.assign(ly.neu_next,0);
             for (int p=0; p<ly.neu_next; p++)
@@ -141,7 +141,7 @@ double neuNet::pass(vector<double> input)
 }
     
 //alpha:learning rate, step for limitation
-void neuNet::train(double alpha, int step_limit, vector<vector<double>> input, vector<double> output)
+void neuNet::train(double alpha, int step_limit, vector<vector<double> > input, vector<double> output)
     {
         this->setInput(input);
         this->setOutput(output);
@@ -240,7 +240,7 @@ void neuNet::train(double alpha, int step_limit, vector<vector<double>> input, v
     }
 
 
-double neuNet::test(vector<vector<double>> input, vector<double> output)
+double neuNet::test(vector<vector<double> > input, vector<double> output)
     {
         setInput(input);
         vector<double> out = this->pass();
@@ -259,11 +259,8 @@ double neuNet::test(vector<vector<double>> input, vector<double> output)
                 accuracy++;
         }
         cout<<"accurracy: "<<accuracy/output.size()<<" loss: "<<los<<endl;
-        //return accuracy/output.size();
         return los;
     }
-
-
     
 double neuNet::loss(vector<double> output, vector<double> testoutput)
     {
@@ -275,20 +272,8 @@ double neuNet::loss(vector<double> output, vector<double> testoutput)
         cout<<"//////////////loss: "<<los/2<<endl;
         return los/2;
     }
-    /*
-    void printWeight()
-    {
-        for (int i=0;i<this->layers.size();i++)
-        {
-            for (int j=0;j<this->layers[i].weights.size();j++)
-            {
-                cout << this->layers[i].weights[j] << ' ';
-            }
-            cout << endl;
-        }
-    }
-    */
-void neuNet::setInput(vector<vector<double>> input)
+
+void neuNet::setInput(vector<vector<double> > input)
 {
     this->input = input;
 }
@@ -304,7 +289,7 @@ vector<double> neuNet::getTestOutput(int i)
 {
     return this->output;
 }
-vector<vector<double>> neuNet::getWeights(int i)
+vector<vector<double> > neuNet::getWeights(int i)
 {
     return this->layers[i].weights;
 }
